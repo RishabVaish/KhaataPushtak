@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const fs = require("fs");
+// require("dotenv").config();
 
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
@@ -28,22 +29,22 @@ app.get("/edit/:filename", (req, res) => {
 });
 
 app.get("/hisaab/:filename", (req, res) => {
-    fs.readFile(`./hisaab/${req.params.filename}`, "utf-8", (err, filedata) => {
-        if(err) return res.status(500).send(err);
-        res.render("hisaab", {filedata, filename: req.params.filename});
-    });
+  fs.readFile(`./hisaab/${req.params.filename}`, "utf-8", (err, filedata) => {
+    if (err) return res.status(500).send(err);
+    res.render("hisaab", { filedata, filename: req.params.filename });
+  });
 });
 
 app.get("/delete/:filename", (req, res) => {
-    fs.unlink(`./hisaab/${req.params.filename}`, function(err){
-        if(err) return res.send(err);
-        res.redirect("/");
-    });
+  fs.unlink(`./hisaab/${req.params.filename}`, function (err) {
+    if (err) return res.send(err);
+    res.redirect("/");
+  });
 });
 
 app.post("/update/:filename", (req, res) => {
-  fs.writeFile(`./hisaab/${req.params.filename}`, req.body.content, (err)=>{
-    if(err) return res.status(500).send(err);
+  fs.writeFile(`./hisaab/${req.params.filename}`, req.body.content, (err) => {
+    if (err) return res.status(500).send(err);
     res.redirect("/");
   });
 });
@@ -71,6 +72,8 @@ app.post("/createhisaab", (req, res) => {
   });
 });
 
-app.listen(3000, (req, res) => {
-  console.log("Server is running on port 3000");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on ${PORT}`);
 });
