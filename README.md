@@ -156,12 +156,21 @@ Responsible for:
 
 # 🧩 MVC Architecture
 
+<<<<<<< HEAD
 | Layer      | Responsibility              | Folder         |
 | ---------- | --------------------------- | -------------- |
 | Model      | Data Structure & Validation | `models/`      |
 | Controller | Business Logic              | `controllers/` |
 | Routes     | URL Mapping                 | `routes/`      |
 | View       | React Frontend              | `client/`      |
+=======
+| Layer | Responsibility | Folder |
+|-------|----------------|---------|
+| Model | Data Structure & Validation | `models/` |
+| Controller | Business Logic | `controllers/` |
+| Routes | URL Mapping | `routes/` |
+| View | React Frontend | `client/` |
+>>>>>>> 21e47e68544e80bae4c5917f75364326b25d36a3
 
 ---
 
@@ -209,6 +218,7 @@ Base URL:
 /api/hisaab
 ```
 
+<<<<<<< HEAD
 | Method | Endpoint          | Description       |
 | ------ | ----------------- | ----------------- |
 | GET    | `/api/hisaab`     | Get all Hisaabs   |
@@ -216,6 +226,15 @@ Base URL:
 | POST   | `/api/hisaab`     | Create Hisaab     |
 | PUT    | `/api/hisaab/:id` | Update Hisaab     |
 | DELETE | `/api/hisaab/:id` | Delete Hisaab     |
+=======
+| Method | Endpoint | Description |
+|---------|-----------|-------------|
+| GET | `/api/hisaab` | Get all Hisaabs |
+| GET | `/api/hisaab/:id` | Get single Hisaab |
+| POST | `/api/hisaab` | Create Hisaab |
+| PUT | `/api/hisaab/:id` | Update Hisaab |
+| DELETE | `/api/hisaab/:id` | Delete Hisaab |
+>>>>>>> 21e47e68544e80bae4c5917f75364326b25d36a3
 
 ---
 
