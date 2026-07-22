@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import hisaabRoutes from "./routes/hisaabRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
 // Load environment variables from .env into process.env
@@ -34,6 +35,9 @@ app.get("/", (req, res) => {
 // Mount all /api/hisaab/* routes.
 app.use("/api/hisaab", hisaabRoutes);
 
+// Mount all /api/auth/* routes.
+app.use("/api/auth", authRoutes);
+
 // ── Error Handling (must be registered LAST) ────────────
 app.use(notFound);
 app.use(errorHandler);
@@ -41,5 +45,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  console.log(
+    `🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`,
+  );
 });
