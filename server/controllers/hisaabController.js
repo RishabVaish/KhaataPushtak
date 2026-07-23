@@ -1,15 +1,18 @@
 import Hisaab from "../models/Hisaab.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
-// @desc    Get all hisaabs (supports search, category filter, sort)
+// @desc    Get all hisaabs BELONGING TO THE LOGGED-IN USER
+//          (supports search, category filter, sort)
 // @route   GET /api/hisaab
-// @access  Public
+// @access  Private
 export const getHisaabs = asyncHandler(async (req, res) => {
   const { search, category, sort } = req.query;
 
-  // Build a MongoDB query object dynamically based on what
-  // query params the client actually sent.
-  const query = {};
+  // Ownership filter — ALWAYS included, never optional. Every other
+  // filter (search/category) is ADDED on top of this base constraint,
+  // so a user can never accidentally (or maliciously) query outside
+  // their own data.
+  const query = { user: req.user._id };
 
   if (search) {
     // $regex with 'i' option = case-insensitive partial match.
@@ -27,7 +30,13 @@ export const getHisaabs = asyncHandler(async (req, res) => {
   // Default sort: newest first. Client can pass ?sort=oldest to flip it.
   const sortOrder = sort === "oldest" ? "createdAt" : "-createdAt";
 
-  const hisaabs = await Hisaab.find(query).sort(sortOrder);
+  // .populate("user", "name email avatar") replaces the raw user
+  // ObjectId with the actual user document (only these 3 fields —
+  // never populate password, even though select:false already
+  // excludes it by default, this is defense-in-depth).
+  const hisaabs = await Hisaab.find(query)
+    .sort(sortOrder)
+    .populate("user", "name email avatar");
 
   res.status(200).json({
     success: true,
@@ -36,11 +45,18 @@ export const getHisaabs = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get a single hisaab by ID
+// @desc    Get a single hisaab by ID (only if it belongs to the user)
 // @route   GET /api/hisaab/:id
-// @access  Public
+// @access  Private
 export const getHisaabById = asyncHandler(async (req, res) => {
-  const hisaab = await Hisaab.findById(req.params.id);
+  // Compound filter: must match BOTH the ID and the owner. If a
+  // Hisaab with this ID exists but belongs to someone else, this
+  // returns null — same as if it didn't exist at all. We never leak
+  // "this exists but isn't yours."
+  const hisaab = await Hisaab.findOne({
+    _id: req.params.id,
+    user: req.user._id,
+  }).populate("user", "name email avatar");
 
   if (!hisaab) {
     res.status(404);
@@ -53,16 +69,23 @@ export const getHisaabById = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Create a new hisaab
+// @desc    Create a new hisaab, owned by the logged-in user
 // @route   POST /api/hisaab
-// @access  Public
+// @access  Private
 export const createHisaab = asyncHandler(async (req, res) => {
   const { title, content, category } = req.body;
 
-  // Mongoose schema validation (required, enum) runs automatically
-  // on .create() — if it fails, it throws a ValidationError which
-  // our centralized errorHandler catches and formats.
-  const hisaab = await Hisaab.create({ title, content, category });
+  // user is NEVER taken from req.body — it is derived exclusively
+  // from the verified JWT (req.user, set by authMiddleware). This
+  // is the single most important line in this file: it's what makes
+  // it impossible for a client to create a Hisaab on someone else's
+  // behalf, even if they tamper with the request body.
+  const hisaab = await Hisaab.create({
+    title,
+    content,
+    category,
+    user: req.user._id,
+  });
 
   res.status(201).json({
     success: true,
@@ -71,17 +94,29 @@ export const createHisaab = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update an existing hisaab
+// @desc    Update a hisaab (only if it belongs to the user)
 // @route   PUT /api/hisaab/:id
-// @access  Public
+// @access  Private
 export const updateHisaab = asyncHandler(async (req, res) => {
-  const hisaab = await Hisaab.findByIdAndUpdate(
-    req.params.id,
-    req.body,
+  // Whitelist exactly which fields a client is allowed to change.
+  // We deliberately do NOT spread req.body directly — if we did, a
+  // malicious client could sneak {"user": "<someone_else_id>"} into
+  // the request and reassign ownership of the document. Only these
+  // three fields are ever accepted, regardless of what else is sent.
+  const { title, content, category } = req.body;
+  const updates = { title, content, category };
+
+  // Same compound-filter pattern as getHisaabById. findOneAndUpdate
+  // will simply not match (and return null) if this Hisaab belongs
+  // to a different user — no separate "is this mine?" check needed,
+  // the query itself enforces ownership atomically.
+  const hisaab = await Hisaab.findOneAndUpdate(
+    { _id: req.params.id, user: req.user._id },
+    updates,
     {
       new: true, // return the UPDATED document, not the original
       runValidators: true, // re-run schema validation on update
-    }
+    },
   );
 
   if (!hisaab) {
@@ -96,11 +131,14 @@ export const updateHisaab = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Delete a hisaab
+// @desc    Delete a hisaab (only if it belongs to the user)
 // @route   DELETE /api/hisaab/:id
-// @access  Public
+// @access  Private
 export const deleteHisaab = asyncHandler(async (req, res) => {
-  const hisaab = await Hisaab.findByIdAndDelete(req.params.id);
+  const hisaab = await Hisaab.findOneAndDelete({
+    _id: req.params.id,
+    user: req.user._id,
+  });
 
   if (!hisaab) {
     res.status(404);

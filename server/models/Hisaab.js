@@ -6,6 +6,14 @@ import mongoose from "mongoose";
 // against bad/malformed data.
 const hisaabSchema = new mongoose.Schema(
   {
+    // Links every Hisaab to exactly one owner. ObjectId + ref lets
+    // Mongoose "populate" this field with the actual User document
+    // on demand, without duplicating user data into every Hisaab.
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     title: {
       type: String,
       required: [true, "Title is required"],
@@ -36,7 +44,7 @@ const hisaabSchema = new mongoose.Schema(
     // Automatically adds and manages createdAt & updatedAt fields.
     // updatedAt refreshes every time .save() or a findOneAndUpdate runs.
     timestamps: true,
-  }
+  },
 );
 
 // mongoose.model(name, schema) — Mongoose pluralizes "Hisaab" to the
