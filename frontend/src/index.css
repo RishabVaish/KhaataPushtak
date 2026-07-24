@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/* ── Design tokens ─────────────────────────────────────────
+   Centralizing colors as CSS variables (rather than hardcoding
+   hex values across components) means a theme change later
+   (e.g., adding dark mode) touches ONE place, not every file. */
+:root {
+  --color-bg: #FAFAF9;
+  --color-surface: #FFFFFF;
+  --color-border: #E7E5E4;
+  --color-text-primary: #292524;
+  --color-text-secondary: #78716C;
+  --color-accent: #6366F1;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
