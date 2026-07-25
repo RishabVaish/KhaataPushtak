@@ -1,14 +1,18 @@
 import { RouterProvider } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import router from "./routes/AppRoutes";
+import { AuthProvider } from "./context/AuthContext";
 
-// App.jsx stays intentionally minimal — it only wires up global,
-// app-wide concerns: routing and toast notifications. As we add
-// AuthContext in Phase 2.2, it will wrap <RouterProvider /> here too,
-// so auth state is available to every page in the app.
+// App.jsx wires up global, app-wide concerns: authentication,
+// routing, and toast notifications. AuthProvider MUST wrap
+// RouterProvider — every page and ProtectedRoute calls useAuth(),
+// which only works if they render somewhere INSIDE this provider's
+// tree. This is the most common Context bug: consumers rendered
+// outside their provider throw "useAuth must be used within an
+// AuthProvider."
 function App() {
   return (
-    <>
+    <AuthProvider>
       <RouterProvider router={router} />
 
       {/* Global toast notification renderer. Any component anywhere
@@ -25,7 +29,7 @@ function App() {
           },
         }}
       />
-    </>
+    </AuthProvider>
   );
 }
 
