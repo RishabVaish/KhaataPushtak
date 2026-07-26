@@ -1,9 +1,7 @@
 import Modal from "./Modal";
+import Button from "./Button";
 
-// Reuses the same generic Modal shell as HisaabForm — proof that
-// extracting Modal separately was worth it. This component only
-// adds its own CONTENT (a warning message + two buttons); the
-// backdrop/centering/close mechanics are inherited for free.
+// Reuses the generic Modal shell (backdrop, Escape-to-close, focus management) — proof that extracting Modal separately was worth it. Now also reuses Button for consistent loading/disabled states.
 const DeleteModal = ({
   isOpen,
   onClose,
@@ -22,19 +20,23 @@ const DeleteModal = ({
       </p>
 
       <div className="flex gap-3">
-        <button
+        <Button
+          type="button"
+          variant="secondary"
           onClick={onClose}
-          className="flex-1 py-2 rounded-lg border border-(--color-border) font-medium"
+          className="flex-1"
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
+          type="button"
+          variant="danger"
           onClick={onConfirm}
-          disabled={isDeleting}
-          className="flex-1 py-2 rounded-lg bg-red-500 text-white font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+          isLoading={isDeleting}
+          className="flex-1"
         >
           {isDeleting ? "Deleting..." : "Delete"}
-        </button>
+        </Button>
       </div>
     </Modal>
   );

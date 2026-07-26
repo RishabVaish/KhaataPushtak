@@ -4,6 +4,7 @@ import { FiEye, FiEyeOff, FiMail, FiLock, FiUser } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import getErrorMessage from "../utils/getErrorMessage";
+import Button from "../components/Button";
 
 const Register = () => {
   const { register } = useAuth();
@@ -22,7 +23,6 @@ const Register = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -41,9 +41,6 @@ const Register = () => {
       newErrors.email = "Enter a valid email address";
     }
 
-    // Mirrors the backend's minlength: 6 rule from models/User.js —
-    // catching it client-side avoids a wasted round trip, but the
-    // backend remains the real enforcement point.
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
@@ -78,64 +75,88 @@ const Register = () => {
     }
   };
 
+  const inputBaseClass =
+    "w-full pl-10 pr-3 py-2 rounded-lg border bg-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]";
+
   return (
-    <div className="max-w-md mx-auto mt-8">
-      <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-8 shadow-sm">
+    <div className="max-w-md mx-auto mt-4 sm:mt-8 animate-fade-in">
+      <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-6 sm:p-8 shadow-sm">
         <h1 className="text-2xl font-semibold mb-1">Create your account</h1>
         <p className="text-(--color-text-secondary) text-sm mb-6">
           Start keeping track of your Hisaabs
         </p>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
-          {/* Name field */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-1">
               Name
             </label>
             <div className="relative">
-              <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-(--color-text-secondary)" />
+              <FiUser
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-(--color-text-secondary)"
+                aria-hidden="true"
+              />
               <input
                 id="name"
                 name="name"
                 type="text"
+                autoComplete="name"
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Ravi Kumar"
-                className={`w-full pl-10 pr-3 py-2 rounded-lg border bg-transparent focus:outline-none focus:ring-2 focus:ring-(--color-accent) ${
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? "name-error" : undefined}
+                className={`${inputBaseClass} ${
                   errors.name ? "border-red-400" : "border-(--color-border)"
                 }`}
               />
             </div>
             {errors.name && (
-              <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+              <p
+                id="name-error"
+                role="alert"
+                className="text-red-500 text-xs mt-1"
+              >
+                {errors.name}
+              </p>
             )}
           </div>
 
-          {/* Email field */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-1">
               Email
             </label>
             <div className="relative">
-              <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-(--color-text-secondary)" />
+              <FiMail
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-(--color-text-secondary)"
+                aria-hidden="true"
+              />
               <input
                 id="email"
                 name="email"
                 type="email"
+                autoComplete="email"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="you@example.com"
-                className={`w-full pl-10 pr-3 py-2 rounded-lg border bg-transparent focus:outline-none focus:ring-2 focus:ring-(--color-accent) ${
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : undefined}
+                className={`${inputBaseClass} ${
                   errors.email ? "border-red-400" : "border-(--color-border)"
                 }`}
               />
             </div>
             {errors.email && (
-              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+              <p
+                id="email-error"
+                role="alert"
+                className="text-red-500 text-xs mt-1"
+              >
+                {errors.email}
+              </p>
             )}
           </div>
 
-          {/* Password field */}
           <div>
             <label
               htmlFor="password"
@@ -144,35 +165,46 @@ const Register = () => {
               Password
             </label>
             <div className="relative">
-              <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-(--color-text-secondary)" />
+              <FiLock
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-(--color-text-secondary)"
+                aria-hidden="true"
+              />
               <input
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="At least 6 characters"
-                className={`w-full pl-10 pr-10 py-2 rounded-lg border bg-transparent focus:outline-none focus:ring-2 focus:ring-(--color-accent) ${
+                aria-invalid={!!errors.password}
+                aria-describedby={
+                  errors.password ? "password-error" : undefined
+                }
+                className={`${inputBaseClass} pr-10 ${
                   errors.password ? "border-red-400" : "border-(--color-border)"
                 }`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-(--color-text-secondary)"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-(--color-text-secondary) hover:text-(--color-text-primary) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) rounded"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <FiEyeOff /> : <FiEye />}
               </button>
             </div>
             {errors.password && (
-              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+              <p
+                id="password-error"
+                role="alert"
+                className="text-red-500 text-xs mt-1"
+              >
+                {errors.password}
+              </p>
             )}
           </div>
 
-          {/* Confirm Password field — reuses the same showPassword
-              toggle state as the field above, so both fields reveal
-              together (simpler UX than two independent toggles). */}
           <div>
             <label
               htmlFor="confirmPassword"
@@ -181,15 +213,23 @@ const Register = () => {
               Confirm Password
             </label>
             <div className="relative">
-              <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-(--color-text-secondary)" />
+              <FiLock
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-(--color-text-secondary)"
+                aria-hidden="true"
+              />
               <input
                 id="confirmPassword"
                 name="confirmPassword"
                 type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Re-enter your password"
-                className={`w-full pl-10 pr-3 py-2 rounded-lg border bg-transparent focus:outline-none focus:ring-2 focus:ring-(--color-accent) ${
+                aria-invalid={!!errors.confirmPassword}
+                aria-describedby={
+                  errors.confirmPassword ? "confirm-error" : undefined
+                }
+                className={`${inputBaseClass} ${
                   errors.confirmPassword
                     ? "border-red-400"
                     : "border-(--color-border)"
@@ -197,24 +237,27 @@ const Register = () => {
               />
             </div>
             {errors.confirmPassword && (
-              <p className="text-red-500 text-xs mt-1">
+              <p
+                id="confirm-error"
+                role="alert"
+                className="text-red-500 text-xs mt-1"
+              >
                 {errors.confirmPassword}
               </p>
             )}
           </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-2.5 rounded-lg bg-(--color-accent) text-white font-medium disabled:opacity-60 disabled:cursor-not-allowed transition-opacity"
-          >
+          <Button type="submit" isLoading={isSubmitting} className="w-full">
             {isSubmitting ? "Creating account..." : "Create account"}
-          </button>
+          </Button>
         </form>
 
         <p className="text-sm text-center text-(--color-text-secondary) mt-6">
           Already have an account?{" "}
-          <Link to="/login" className="text-(--color-accent) font-medium">
+          <Link
+            to="/login"
+            className="text-(--color-accent) font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) rounded"
+          >
             Log in
           </Link>
         </p>

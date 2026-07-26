@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
+import Button from "./Button";
 import { CATEGORIES } from "../utils/categories";
 
-// HisaabForm handles BOTH create and edit with one component.
-// `initialData` being present/absent is the only thing that
-// distinguishes the two cases — the form doesn't know or care
-// whether onSubmit will result in a POST or a PUT; that decision
-// belongs to Dashboard, which owns all business logic.
+// HisaabForm handles BOTH create and edit with one component. `initialData` being present/absent is the only thing that distinguishes the two cases — the form doesn't know or care whether onSubmit will result in a POST or a PUT.
 const HisaabForm = ({
   isOpen,
   onClose,
@@ -21,11 +18,6 @@ const HisaabForm = ({
   });
   const [errors, setErrors] = useState({});
 
-  // Re-populate the form every time the modal opens or the entry
-  // being edited changes. Without this effect, editing entry A then
-  // clicking edit on entry B would still show entry A's stale data,
-  // since HisaabForm is one persistent component instance reused
-  // across every open/close — it isn't remounted each time.
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -54,10 +46,12 @@ const HisaabForm = ({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
-    // Dashboard's onSubmit decides create vs update — this component
-    // just hands back the validated form data.
     onSubmit(formData);
   };
+
+  // Shared input classes, extracted as a local constant (not a new file) since it's just a string used 2x in this one component — not worth promoting to a shared component across the whole app.
+  const inputBaseClass =
+    "w-full px-3 py-2 rounded-lg border bg-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]";
 
   return (
     <Modal
@@ -77,12 +71,20 @@ const HisaabForm = ({
             value={formData.title}
             onChange={handleChange}
             placeholder="e.g. Grocery shopping"
-            className={`w-full px-3 py-2 rounded-lg border bg-transparent focus:outline-none focus:ring-2 focus:ring-(--color-accent) ${
+            aria-invalid={!!errors.title}
+            aria-describedby={errors.title ? "title-error" : undefined}
+            className={`${inputBaseClass} ${
               errors.title ? "border-red-400" : "border-(--color-border)"
             }`}
           />
           {errors.title && (
-            <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+            <p
+              id="title-error"
+              role="alert"
+              className="text-red-500 text-xs mt-1"
+            >
+              {errors.title}
+            </p>
           )}
         </div>
 
@@ -97,12 +99,20 @@ const HisaabForm = ({
             value={formData.content}
             onChange={handleChange}
             placeholder="Add details about this entry..."
-            className={`w-full px-3 py-2 rounded-lg border bg-transparent focus:outline-none focus:ring-2 focus:ring-(--color-accent) resize-none ${
+            aria-invalid={!!errors.content}
+            aria-describedby={errors.content ? "content-error" : undefined}
+            className={`${inputBaseClass} resize-none ${
               errors.content ? "border-red-400" : "border-(--color-border)"
             }`}
           />
           {errors.content && (
-            <p className="text-red-500 text-xs mt-1">{errors.content}</p>
+            <p
+              id="content-error"
+              role="alert"
+              className="text-red-500 text-xs mt-1"
+            >
+              {errors.content}
+            </p>
           )}
         </div>
 
@@ -115,7 +125,7 @@ const HisaabForm = ({
             name="category"
             value={formData.category}
             onChange={handleChange}
-            className="w-full px-3 py-2 rounded-lg border border-(--color-border) bg-transparent focus:outline-none focus:ring-2 focus:ring-(--color-accent)"
+            className={`${inputBaseClass} border-(--color-border)`}
           >
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
@@ -126,24 +136,26 @@ const HisaabForm = ({
         </div>
 
         <div className="flex gap-3 pt-2">
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={onClose}
-            className="flex-1 py-2 rounded-lg border border-(--color-border) font-medium"
+            className="flex-1"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
-            disabled={isSubmitting}
-            className="flex-1 py-2 rounded-lg bg-(--color-accent) text-white font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+            variant="primary"
+            isLoading={isSubmitting}
+            className="flex-1"
           >
             {isSubmitting
               ? "Saving..."
               : initialData
                 ? "Save Changes"
                 : "Create"}
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

@@ -5,6 +5,27 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>KhaataPushtak</title>
+    <script>
+      // Runs synchronously, before ANY rendering — this is the only
+      // way to avoid a "flash of wrong theme." A React useEffect
+      // would run AFTER the first paint, meaning dark-mode users
+      // would see a flash of the light theme every page load.
+      (function () {
+        try {
+          var stored = localStorage.getItem("khaatapushtak_theme");
+          var systemPrefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+          ).matches;
+          var isDark = stored ? stored === "dark" : systemPrefersDark;
+          if (isDark) {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (e) {
+          // localStorage can throw in some privacy modes — fail
+          // silently and just default to light theme.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

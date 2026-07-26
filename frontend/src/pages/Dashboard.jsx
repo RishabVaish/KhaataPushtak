@@ -18,43 +18,29 @@ import FilterBar from "../components/FilterBar";
 import HisaabCard from "../components/HisaabCard";
 import HisaabForm from "../components/HisaabForm";
 import DeleteModal from "../components/DeleteModal";
-import Spinner from "../components/Spinner";
+import SkeletonCard from "../components/SkeletonCard";
 import EmptyState from "../components/EmptyState";
+import Button from "../components/Button";
 
-// Dashboard OWNS all business logic for Hisaab management. Every
-// component it renders below is "dumb" — receiving data via props
-// and reporting user actions back via callbacks. This file is the
-// only one that calls hisaabService, decides create-vs-update, and
-// triggers refetches. This mirrors the backend's controller layer:
-// components are like views, Dashboard is like the controller.
+// Dashboard OWNS all business logic. Every component it renders is "dumb" — receiving data via props and reporting actions back via callbacks. This file is the only one that calls hisaabService.
 const Dashboard = () => {
   const { user } = useAuth();
 
-  // ── Server data + fetch status ──────────────────────────
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-  // ── Search / filter / sort ──────────────────────────────
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [sort, setSort] = useState("newest");
-  // debouncedSearch updates 400ms after the user stops typing.
-  // fetchEntries watches THIS, not `search` directly — see useDebounce
-  // for the full explanation of why.
   const debouncedSearch = useDebounce(search, 400);
 
-  // ── Modal + selection state ──────────────────────────────
-  const [selectedEntry, setSelectedEntry] = useState(null); // null = create mode
+  const [selectedEntry, setSelectedEntry] = useState(null);
   const [showFormModal, setShowFormModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // useCallback memoizes this function so it has a stable identity
-  // across renders — useful since it's the dependency of the
-  // useEffect below (without useCallback, a new function reference
-  // every render would make that effect re-run constantly).
   const fetchEntries = useCallback(async () => {
     setLoading(true);
     setHasError(false);
@@ -73,50 +59,55 @@ const Dashboard = () => {
     }
   }, [debouncedSearch, category, sort]);
 
-  // Re-fetch whenever the debounced search term, category, or sort
-  // changes — this is what makes filtering/sorting/searching feel
-  // "live" without a manual refresh button.
   useEffect(() => {
     fetchEntries();
   }, [fetchEntries]);
 
-  // ── Create / Edit flow ───────────────────────────────────
-  const openCreateModal = () => {
-    setSelectedEntry(null); // null = HisaabForm renders in "create" mode
+  // ── Stable callbacks (useCallback) ───────────────────────
+  // Each has an empty (or minimal) dependency array, meaning React
+  // reuses the SAME function reference across renders. This is what
+  // makes HisaabCard's React.memo actually effective — without this,
+  // every Dashboard re-render (e.g., from typing in search) would
+  // pass a "new" onEdit/onDelete to every card, forcing all of them
+  // to re-render regardless of memo.
+  const openCreateModal = useCallback(() => {
+    setSelectedEntry(null);
     setShowFormModal(true);
-  };
+  }, []);
 
-  const openEditModal = (hisaab) => {
-    setSelectedEntry(hisaab); // present = HisaabForm pre-fills and edits
+  const openEditModal = useCallback((hisaab) => {
+    setSelectedEntry(hisaab);
     setShowFormModal(true);
-  };
+  }, []);
 
-  const handleFormSubmit = async (formData) => {
-    setIsSubmitting(true);
-    try {
-      if (selectedEntry) {
-        await hisaabService.updateHisaab(selectedEntry._id, formData);
-        toast.success("Hisaab updated successfully");
-      } else {
-        await hisaabService.createHisaab(formData);
-        toast.success("Hisaab created successfully");
-      }
-      setShowFormModal(false);
-      fetchEntries(); // refresh the list to reflect the change
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // ── Delete flow ──────────────────────────────────────────
-  const openDeleteModal = (hisaab) => {
+  const openDeleteModal = useCallback((hisaab) => {
     setSelectedEntry(hisaab);
     setShowDeleteModal(true);
-  };
+  }, []);
 
-  const handleDeleteConfirm = async () => {
+  const handleFormSubmit = useCallback(
+    async (formData) => {
+      setIsSubmitting(true);
+      try {
+        if (selectedEntry) {
+          await hisaabService.updateHisaab(selectedEntry._id, formData);
+          toast.success("Hisaab updated successfully");
+        } else {
+          await hisaabService.createHisaab(formData);
+          toast.success("Hisaab created successfully");
+        }
+        setShowFormModal(false);
+        fetchEntries();
+      } catch (error) {
+        toast.error(getErrorMessage(error));
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [selectedEntry, fetchEntries],
+  );
+
+  const handleDeleteConfirm = useCallback(async () => {
     setIsDeleting(true);
     try {
       await hisaabService.deleteHisaab(selectedEntry._id);
@@ -128,15 +119,21 @@ const Dashboard = () => {
     } finally {
       setIsDeleting(false);
     }
-  };
+  }, [selectedEntry, fetchEntries]);
 
-  // Decide which of the 4 body states to render. Order matters:
-  // loading takes priority, then error, then "empty because of
-  // filters" vs "empty because there's truly nothing yet."
   const isFiltering = search.trim() !== "" || category !== "All";
 
   const renderBody = () => {
-    if (loading) return <Spinner />;
+    // Skeleton grid instead of a spinner: mimics the actual card layout about to appear, so the loading→loaded transition feels seamless rather than a jarring swap from "spinner" to "grid."
+    if (loading) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      );
+    }
 
     if (hasError) {
       return (
@@ -144,6 +141,11 @@ const Dashboard = () => {
           icon={<FiWifiOff />}
           title="Something went wrong"
           message="We couldn't load your hisaabs. Please check your connection and try again."
+          action={
+            <Button variant="secondary" onClick={fetchEntries}>
+              Retry
+            </Button>
+          }
         />
       );
     }
@@ -184,9 +186,8 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Welcome section */}
       <div>
-        <h1 className="text-2xl font-semibold">
+        <h1 className="text-xl sm:text-2xl font-semibold">
           Welcome back, {user?.name} 👋
         </h1>
         <p className="text-(--color-text-secondary) text-sm mt-1">
@@ -194,14 +195,14 @@ const Dashboard = () => {
         </p>
       </div>
 
-      {/* Stats */}
       <StatsCard
         label="Total Entries"
         value={entries.length}
         icon={<FiFileText />}
       />
 
-      {/* Controls: search, filter/sort, create button */}
+      {/* flex-col on mobile (stacked controls, full width, no
+          horizontal scrolling), flex-row from sm up. */}
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
         <SearchBar value={search} onChange={setSearch} />
         <FilterBar
@@ -210,22 +211,20 @@ const Dashboard = () => {
           sort={sort}
           onSortChange={setSort}
         />
-        <button
-          onClick={openCreateModal}
-          className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-(--color-accent) text-white font-medium whitespace-nowrap"
-        >
+        <Button onClick={openCreateModal} className="whitespace-nowrap">
           <FiPlus />
           New Hisaab
-        </button>
+        </Button>
       </div>
 
-      {/* Main content: spinner / empty states / grid */}
-      {renderBody()}
+      {/* aria-busy tells assistive tech this region is updating —
+          announced once when loading starts/ends, rather than the
+          skeleton grid's individual (aria-hidden) blocks being read
+          out one by one. */}
+      <div aria-busy={loading} aria-live="polite">
+        {renderBody()}
+      </div>
 
-      {/* Modals — always rendered, but internally return null when
-          closed (see Modal.jsx). Keeping them mounted here means
-          their state (via HisaabForm's useEffect) resets correctly
-          each time they open. */}
       <HisaabForm
         isOpen={showFormModal}
         onClose={() => setShowFormModal(false)}

@@ -1,20 +1,90 @@
 @import "tailwindcss";
 
-/* ── Design tokens ─────────────────────────────────────────
+/* Rewires Tailwind's `dark:` variant to respond to a `.dark` class
+   on <html> instead of the OS-level prefers-color-scheme media
+   query. This is what makes our manual toggle (ThemeContext) able
+   to override the system preference rather than just mirroring it. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Design tokens — Light theme (default) ──────────────────
    Centralizing colors as CSS variables (rather than hardcoding
-   hex values across components) means a theme change later
-   (e.g., adding dark mode) touches ONE place, not every file. */
+   hex values across components) means a theme change touches
+   ONE place, not every file. */
 :root {
-  --color-bg: #FAFAF9;
-  --color-surface: #FFFFFF;
-  --color-border: #E7E5E4;
+  --color-bg: #fafaf9;
+  --color-surface: #ffffff;
+  --color-border: #e7e5e4;
   --color-text-primary: #292524;
-  --color-text-secondary: #78716C;
-  --color-accent: #6366F1;
+  --color-text-secondary: #78716c;
+  --color-accent: #6366f1;
+}
+
+/* ── Design tokens — Dark theme ───────────────────────────────
+   Same variable NAMES, different values. Every component that
+   already uses var(--color-bg) etc. automatically re-themes when
+   the .dark class is toggled — zero component code changes needed. */
+.dark {
+  --color-bg: #18181b;
+  --color-surface: #232326;
+  --color-border: #35353a;
+  --color-text-primary: #f4f4f5;
+  --color-text-secondary: #a1a1aa;
+  --color-accent: #818cf8;
 }
 
 body {
   background-color: var(--color-bg);
   color: var(--color-text-primary);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  /* Smooths the color swap when toggling themes, instead of an
+     instant, jarring snap between light and dark. */
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* ── Lightweight micro-animations ─────────────────────────────
+   Deliberately simple CSS keyframes — no animation library. Used
+   for modal entrances and page-content fades. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.18s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.16s ease-out;
+}
+
+/* Respect users who have asked their OS to minimize motion —
+   accessibility requirement, not just a nice-to-have. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }
