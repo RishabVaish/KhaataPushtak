@@ -33,10 +33,10 @@ app.get("/", (req, res) => {
 });
 
 // Mount all /api/hisaab/* routes.
-app.use("/api/hisaab", hisaabRoutes);
+app.use("/hisaab", hisaabRoutes);
 
 // Mount all /api/auth/* routes.
-app.use("/api/auth", authRoutes);
+app.use("/auth", authRoutes);
 
 // ── Error Handling (must be registered LAST) ────────────
 app.use(notFound);
