@@ -1,38 +1,52 @@
 import { RouterProvider } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import router from "./routes/AppRoutes";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import ErrorBoundary from "./components/ErrorBoundary";
+import FullPageLoader from "./components/FullPageLoader";
 
-// App.jsx wires up global, app-wide concerns: theme, authentication,
-// routing, and toast notifications. Provider order here (Theme
-// outside Auth) doesn't matter functionally — they're independent
-// of each other — but both MUST wrap RouterProvider, since pages
-// and components call useTheme()/useAuth() and can only do that
-// from inside these providers' trees.
+// AppContent reads auth state and gates the ENTIRE router behind
+// AuthContext's initial "checking localStorage" phase. Without this,
+// Navbar would briefly render its "Guest" state (Login/Register
+// links) for an already-logged-in user, flashing to "Logged in" a
+// moment later once rehydration finishes. This must be a separate
+// component (not inline in App) because useAuth() can only be
+// called INSIDE AuthProvider's tree.
+const AppContent = () => {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <FullPageLoader />;
+  }
+
+  return <RouterProvider router={router} />;
+};
+
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <RouterProvider router={router} />
+    // ErrorBoundary wraps EVERYTHING — an error inside ThemeContext,
+    // AuthContext, or any page should show the recovery screen, not
+    // a blank white page.
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppContent />
 
-        {/* Global toast notification renderer. Uses our CSS
-            variables for background/text/border, so toasts
-            automatically re-theme along with the rest of the app —
-            no separate dark-mode toast config needed. */}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: "var(--color-surface)",
-              color: "var(--color-text-primary)",
-              border: "1px solid var(--color-border)",
-            },
-          }}
-        />
-      </AuthProvider>
-    </ThemeProvider>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: "var(--color-surface)",
+                color: "var(--color-text-primary)",
+                border: "1px solid var(--color-border)",
+              },
+            }}
+          />
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

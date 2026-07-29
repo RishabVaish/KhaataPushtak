@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import * as authService from "../services/authService";
+import { isTokenExpired } from "../utils/jwt";
 
 // createContext() creates the "channel." Any component wrapped by
 // <AuthProvider> can subscribe to this channel via useAuth() below,
@@ -30,9 +31,18 @@ export const AuthProvider = ({ children }) => {
     const storedToken = localStorage.getItem(TOKEN_KEY);
     const storedUser = localStorage.getItem(USER_KEY);
 
-    if (storedToken && storedUser) {
+    // Proactively reject an expired token instead of restoring a
+    // session that would just fail on the first API call anyway.
+    // This avoids a confusing flash where the UI briefly shows
+    // "logged in" before an inevitable 401 logs the user back out.
+    if (storedToken && storedUser && !isTokenExpired(storedToken)) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
+    } else if (storedToken) {
+      // A stored token existed but is expired/invalid — clear the
+      // stale session rather than leaving dead data in localStorage.
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
     }
 
     setLoading(false);

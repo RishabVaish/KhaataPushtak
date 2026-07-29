@@ -5,8 +5,10 @@ import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import getErrorMessage from "../utils/getErrorMessage";
 import Button from "../components/Button";
+import useDocumentTitle from "../hooks/useDocumentTitle";
 
 const Login = () => {
+  useDocumentTitle("Log In");
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -82,6 +84,7 @@ const Login = () => {
                 name="email"
                 type="email"
                 autoComplete="email"
+                autoFocus
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="you@example.com"

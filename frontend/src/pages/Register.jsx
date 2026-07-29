@@ -5,8 +5,10 @@ import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import getErrorMessage from "../utils/getErrorMessage";
 import Button from "../components/Button";
+import useDocumentTitle from "../hooks/useDocumentTitle";
 
 const Register = () => {
+  useDocumentTitle("Create Account");
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -101,6 +103,7 @@ const Register = () => {
                 name="name"
                 type="text"
                 autoComplete="name"
+                autoFocus
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Ravi Kumar"

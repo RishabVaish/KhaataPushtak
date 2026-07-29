@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import FullPageLoader from "./FullPageLoader";
 
 // ProtectedRoute wraps any page that requires a logged-in user.
 // Usage in AppRoutes.jsx:
@@ -17,11 +18,7 @@ const ProtectedRoute = ({ children }) => {
   // whose session just hasn't finished loading. A brief loading
   // state prevents this "flicker."
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20 text-(--color-text-secondary)">
-        Loading...
-      </div>
-    );
+    return <FullPageLoader />;
   }
 
   // Navigate with `replace` swaps the current history entry instead

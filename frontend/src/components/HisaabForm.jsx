@@ -3,7 +3,10 @@ import Modal from "./Modal";
 import Button from "./Button";
 import { CATEGORIES } from "../utils/categories";
 
-// HisaabForm handles BOTH create and edit with one component. `initialData` being present/absent is the only thing that distinguishes the two cases — the form doesn't know or care whether onSubmit will result in a POST or a PUT.
+// HisaabForm handles BOTH create and edit with one component.
+// `initialData` being present/absent is the only thing that
+// distinguishes the two cases — the form doesn't know or care
+// whether onSubmit will result in a POST or a PUT.
 const HisaabForm = ({
   isOpen,
   onClose,
@@ -49,7 +52,9 @@ const HisaabForm = ({
     onSubmit(formData);
   };
 
-  // Shared input classes, extracted as a local constant (not a new file) since it's just a string used 2x in this one component — not worth promoting to a shared component across the whole app.
+  // Shared input classes, extracted as a local constant (not a new
+  // file) since it's just a string used 2x in this one component —
+  // not worth promoting to a shared component across the whole app.
   const inputBaseClass =
     "w-full px-3 py-2 rounded-lg border bg-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]";
 
@@ -68,6 +73,7 @@ const HisaabForm = ({
             id="title"
             name="title"
             type="text"
+            autoFocus
             value={formData.title}
             onChange={handleChange}
             placeholder="e.g. Grocery shopping"

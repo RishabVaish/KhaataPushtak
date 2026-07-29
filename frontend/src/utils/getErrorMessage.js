@@ -5,6 +5,13 @@
 // utils/ rather than services/ (which does I/O) or context/
 // (which holds state).
 const getErrorMessage = (error) => {
+  // A timeout is technically a "no response" case too, but deserves
+  // its own message — "check your connection" is misleading if the
+  // real issue is a slow/hung server, not a dead connection.
+  if (error.code === "ECONNABORTED") {
+    return "The request took too long. Please try again.";
+  }
+
   // Case 1: No response at all — the request never reached the
   // server (backend down, no internet, CORS block, etc.)
   if (!error.response) {

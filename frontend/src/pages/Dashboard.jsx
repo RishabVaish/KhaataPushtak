@@ -21,9 +21,13 @@ import DeleteModal from "../components/DeleteModal";
 import SkeletonCard from "../components/SkeletonCard";
 import EmptyState from "../components/EmptyState";
 import Button from "../components/Button";
+import useDocumentTitle from "../hooks/useDocumentTitle";
 
-// Dashboard OWNS all business logic. Every component it renders is "dumb" — receiving data via props and reporting actions back via callbacks. This file is the only one that calls hisaabService.
+// Dashboard OWNS all business logic. Every component it renders is
+// "dumb" — receiving data via props and reporting actions back via
+// callbacks. This file is the only one that calls hisaabService.
 const Dashboard = () => {
+  useDocumentTitle("Dashboard");
   const { user } = useAuth();
 
   const [entries, setEntries] = useState([]);
@@ -124,7 +128,9 @@ const Dashboard = () => {
   const isFiltering = search.trim() !== "" || category !== "All";
 
   const renderBody = () => {
-    // Skeleton grid instead of a spinner: mimics the actual card layout about to appear, so the loading→loaded transition feels seamless rather than a jarring swap from "spinner" to "grid."
+    // Skeleton grid instead of a spinner: mimics the actual card
+    // layout about to appear, so the loading→loaded transition feels
+    // seamless rather than a jarring swap from "spinner" to "grid."
     if (loading) {
       return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

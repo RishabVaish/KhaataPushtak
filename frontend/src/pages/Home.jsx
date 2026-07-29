@@ -1,7 +1,11 @@
+import useDocumentTitle from "../hooks/useDocumentTitle";
+
 // TEMPORARY placeholder — this file exists only to verify the
 // routing + layout foundation renders correctly end-to-end.
 // It will be REPLACED by the real Dashboard page in the next phase.
 const Home = () => {
+  useDocumentTitle("Home");
+
   return (
     <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-8 text-center">
       <h1 className="text-2xl font-semibold mb-2">

@@ -1,3 +1,5 @@
+import logger from "../utils/logger.js";
+
 // notFound runs when a request hits a route that doesn't exist
 // anywhere in our app (e.g., GET /api/banana). It creates an error
 // and passes it along to errorHandler below via next(error).
@@ -29,6 +31,12 @@ export const errorHandler = (err, req, res, next) => {
       .map((val) => val.message)
       .join(", ");
   }
+
+  // ALWAYS log the full error server-side, regardless of environment.
+  // The client response below is deliberately sanitized (no stack in
+  // production) — but without this, production errors would be
+  // invisible to us entirely once we stop exposing stack traces.
+  logger.error(`${req.method} ${req.originalUrl} - ${message}`, err.stack);
 
   res.status(statusCode).json({
     success: false,
