@@ -54,9 +54,13 @@ app.get("/", (req, res) => {
   res.status(200).json({ message: "KhaataPushtak API is running 🚀" });
 });
 
+<<<<<<< HEAD
 // Mount all /api/hisaab/* routes.
 app.use("/hisaab", hisaabRoutes);
 // Mount all /api/auth/* routes.
+=======
+app.use("/hisaab", hisaabRoutes);
+>>>>>>> def2a90 (feat: production hardening and deployment optimization)
 app.use("/auth", authRoutes);
 
 // ── Error Handling (must be registered LAST) ────────────
