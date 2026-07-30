@@ -1,437 +1,236 @@
-# 📒 KhaataPushtak V2
+# KhaataPushtak V2
 
-> **KhaataPushtak (खाता-पुस्तक = "Ledger Book")**
->
-> A modern full-stack MERN application for managing personal notes and expense logs.
+A modern, full-stack personal ledger application — track your everyday expenses and notes, organized by category, with a clean, secure, multi-user dashboard.
 
----
+> **KhaataPushtak** (खाता-पुस्तक) means "ledger book" in Hindi.
 
-# 🚀 Project Overview
+This is a complete rebuild of a file-system-based (`.txt` files + Node's `fs` module) V1 learning project into a production-grade **MERN** application — built to demonstrate real-world full-stack architecture, not just CRUD basics.
 
-KhaataPushtak V2 is the upgraded version of my original project.
-
-Version 1 was built using:
-
-- Node.js
-- Express.js
-- EJS
-- File System (`fs` module)
-
-where every Hisaab was stored as a `.txt` file.
-
-Version 2 reimagines the project as a production-ready MERN Stack application using:
-
-- React.js
-- Express.js
-- MongoDB Atlas
-- REST APIs
-- MVC Architecture
+![Status](https://img.shields.io/badge/status-production--ready-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Node](https://img.shields.io/badge/node-%3E%3D18-green)
+![React](https://img.shields.io/badge/react-19-61DAFB)
 
 ---
 
-# 📖 Project Journey
+## Live Demo
 
-## 🌱 Version 1 (Learning Phase)
+|                 |                                       |
+| --------------- | ------------------------------------- |
+| **Frontend**    | `https://<your-app>.vercel.app`       |
+| **Backend API** | `https://<your-app>.onrender.com/api` |
 
-The goal of Version 1 was to understand:
-
-- File Handling in Node.js
-- CRUD Operations
-- Express Routing
-- EJS Templating
-- Backend Fundamentals
-- How applications work without databases
-
-### Technologies Used
-
-```txt
-Node.js
-Express.js
-EJS
-File System (fs)
-```
+_(Replace with your actual deployed URLs before publishing.)_
 
 ---
 
-## ⚠ Problems in Version 1
+## Features
 
-### 1. Data stored as `.txt` files
-
-- Difficult to query
-- Difficult to filter
-- Difficult to scale
-
----
-
-### 2. Serverless deployment limitations
-
-Platforms like Vercel use ephemeral file systems.
-
-```txt
-File writes disappear after redeployment.
-```
+- 🔐 **JWT Authentication** — register, login, persistent sessions with expiry detection
+- 👤 **User Ownership** — every Hisaab entry is private to its creator, enforced at the database query level
+- 📝 **Full CRUD** — create, read, update, delete ledger entries
+- 🔍 **Search, Filter & Sort** — debounced live search, category filtering, newest/oldest sort
+- 🌓 **Dark / Light Theme** — persisted, respects system preference, zero flash on load
+- 📱 **Fully Responsive** — mobile, tablet, and desktop
+- ⚡ **Route-Level Code Splitting** — each page loads as its own chunk
+- 💀 **Skeleton Loading States** — no jarring spinner-to-content jumps
+- 🛡️ **Error Boundaries & 404 Handling** — graceful failure states throughout
+- ♿ **Accessible** — ARIA labels, keyboard navigation, focus management, `prefers-reduced-motion` support
 
 ---
 
-### 3. No concurrency safety
+## Tech Stack
 
-Two users writing simultaneously could corrupt files.
+**Frontend**
 
----
-
-### 4. Tight coupling
-
-Backend and UI logic were strongly coupled.
-
----
-
-## 🚀 Why Version 2?
-
-Version 2 is designed to learn:
-
-- Full Stack Development
-- Database Design
-- MVC Architecture
-- REST APIs
-- Cloud Deployment
-- Production Architecture
-
----
-
-# 🏗 Architecture
-
-```txt
-┌─────────────┐      HTTPS/REST       ┌─────────────┐      Mongoose      ┌──────────────┐
-│   React SPA │ ───────────────────▶ │ Express API │ ─────────────────▶ │ MongoDB Atlas│
-│  (Vercel)   │ ◀─────────────────── │  (Render)   │ ◀──────────────── │    (Cloud)   │
-└─────────────┘        JSON           └─────────────┘      Documents     └──────────────┘
-```
-
----
-
-# 🏛 Three Tier Architecture
-
-## Frontend
-
-- React.js
-- Tailwind CSS
+- React 19 (Vite)
+- Tailwind CSS v4
+- React Router DOM v7
 - Axios
-- React Router
-
-Responsible for:
-
-- Presentation Layer
-- User Interactions
-- API Requests
-
----
-
-## Backend
-
-- Node.js
-- Express.js
-- REST APIs
-
-Responsible for:
-
-- Business Logic
-- Validation
-- Database Operations
-
----
-
-## Database
-
-- MongoDB Atlas
-- Mongoose ODM
-
-Responsible for:
-
-- Persistent Storage
-- Searching
-- Filtering
-- Sorting
-
----
-
-# 🧩 MVC Architecture
-
-<<<<<<< HEAD
-| Layer      | Responsibility              | Folder         |
-| ---------- | --------------------------- | -------------- |
-| Model      | Data Structure & Validation | `models/`      |
-| Controller | Business Logic              | `controllers/` |
-| Routes     | URL Mapping                 | `routes/`      |
-| View       | React Frontend              | `client/`      |
-=======
-| Layer | Responsibility | Folder |
-|-------|----------------|---------|
-| Model | Data Structure & Validation | `models/` |
-| Controller | Business Logic | `controllers/` |
-| Routes | URL Mapping | `routes/` |
-| View | React Frontend | `client/` |
->>>>>>> 21e47e68544e80bae4c5917f75364326b25d36a3
-
----
-
-# 📂 Folder Structure
-
-## Backend
-
-```txt
-server/
-
-├── config/
-├── controllers/
-├── middleware/
-├── models/
-├── routes/
-├── utils/
-├── .env
-├── index.js
-└── package.json
-```
-
----
-
-## Frontend
-
-```txt
-client/
-
-├── components/
-├── pages/
-├── hooks/
-├── context/
-├── services/
-├── App.jsx
-└── main.jsx
-```
-
----
-
-# 🔗 REST API Endpoints
-
-Base URL:
-
-```txt
-/api/hisaab
-```
-
-<<<<<<< HEAD
-| Method | Endpoint          | Description       |
-| ------ | ----------------- | ----------------- |
-| GET    | `/api/hisaab`     | Get all Hisaabs   |
-| GET    | `/api/hisaab/:id` | Get single Hisaab |
-| POST   | `/api/hisaab`     | Create Hisaab     |
-| PUT    | `/api/hisaab/:id` | Update Hisaab     |
-| DELETE | `/api/hisaab/:id` | Delete Hisaab     |
-=======
-| Method | Endpoint | Description |
-|---------|-----------|-------------|
-| GET | `/api/hisaab` | Get all Hisaabs |
-| GET | `/api/hisaab/:id` | Get single Hisaab |
-| POST | `/api/hisaab` | Create Hisaab |
-| PUT | `/api/hisaab/:id` | Update Hisaab |
-| DELETE | `/api/hisaab/:id` | Delete Hisaab |
->>>>>>> 21e47e68544e80bae4c5917f75364326b25d36a3
-
----
-
-# 📦 Response Format
-
-## Success
-
-```json
-{
-  "success": true,
-  "message": "Hisaab created successfully",
-  "data": {}
-}
-```
-
----
-
-## Error
-
-```json
-{
-  "success": false,
-  "message": "Hisaab not found"
-}
-```
-
----
-
-# 🗄 Database Schema
-
-```js
-{
-  title: {
-    type: String,
-    required: true,
-    trim: true
-  },
-
-  content: {
-    type: String,
-    required: true
-  },
-
-  category: {
-    type: String,
-    enum: [
-      "Grocery",
-      "Food",
-      "Shopping",
-      "Bills",
-      "Travel",
-      "Home",
-      "Other"
-    ],
-    default: "Other"
-  }
-}
-```
-
----
-
-# 🚀 Deployment Architecture
-
-## Frontend
-
-```txt
-Vercel
-```
-
----
-
-## Backend
-
-```txt
-Render
-```
-
----
-
-## Database
-
-```txt
-MongoDB Atlas
-```
-
----
-
-# ⚠ Deployment Challenges Learned
-
-### Version 1
-
-❌ Local file system storage
-
-❌ Not suitable for serverless platforms
-
-❌ Tight coupling
-
----
-
-### Version 2
-
-✅ Persistent Database
-
-✅ Decoupled Architecture
-
-✅ Production Ready
-
----
-
-# 📚 Learning Outcomes
-
-- REST APIs
-- MVC Architecture
-- MongoDB & Mongoose
-- React Hooks
-- Axios Integration
-- Cloud Deployment
-- Environment Variables
-- Professional Folder Structure
-
----
-
-# 🔮 Future Scope
-
-- JWT Authentication
-- Multi User Support
-- Cloudinary File Uploads
-- Expense Analytics Dashboard
-- PDF Export
-- CSV Export
-- Pagination
-- Notifications
-
----
-
-# 🛠 Tech Stack
-
-## Frontend
-
-- React.js
-- Tailwind CSS
-- Axios
-- React Router DOM
 - React Hot Toast
+- React Icons
 
-## Backend
+**Backend**
 
-- Node.js
-- Express.js
-- MongoDB Atlas
-- Mongoose
-- dotenv
-- cors
+- Node.js + Express
+- MongoDB Atlas + Mongoose
+- JWT (`jsonwebtoken`) + `bcryptjs`
+- Morgan (request logging)
+
+**Testing**
+
+- Vitest + Supertest (backend)
+- Vitest + React Testing Library (frontend)
+
+**Deployment**
+
+- Frontend → Vercel
+- Backend → Render
+- Database → MongoDB Atlas
 
 ---
 
-# 📈 Project Evolution
+## Folder Structure
 
-```txt
-KhaataPushtak V1
-(File System)
+```
+khaatapushtak-v2/
+├── client/                 # React frontend (Vite)
+│   ├── src/
+│   │   ├── components/     # Reusable presentational components
+│   │   ├── context/        # AuthContext, ThemeContext
+│   │   ├── hooks/          # useDebounce, useDocumentTitle
+│   │   ├── layouts/        # MainLayout
+│   │   ├── pages/          # Route-level screens
+│   │   ├── routes/         # Centralized route config
+│   │   ├── services/       # All Axios/API calls
+│   │   └── utils/          # Pure helper functions
+│   └── vercel.json
+├── server/                 # Express backend
+│   ├── config/              # DB connection
+│   ├── controllers/         # Business logic
+│   ├── middleware/          # Auth guard, error handling
+│   ├── models/               # Mongoose schemas
+│   ├── routes/                # URL → controller mapping
+│   ├── utils/                  # asyncHandler, logger, generateToken
+│   └── index.js
+├── docs/                    # Architecture, API, deployment docs
+└── README.md
+```
 
-↓
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full explanation of data flow and design decisions.
 
-Learned CRUD & File Handling
+---
 
-↓
+## Screenshots
 
-Discovered Deployment Limitations
+| Dashboard (Light) | Dashboard (Dark) |
+| ----------------- | ---------------- |
+| _add screenshot_  | _add screenshot_ |
 
-↓
+| Login            | Mobile View      |
+| ---------------- | ---------------- |
+| _add screenshot_ | _add screenshot_ |
 
-Learned MongoDB & MVC
+---
 
-↓
+## Installation
 
-KhaataPushtak V2
-(MERN Stack)
+### Prerequisites
+
+- Node.js ≥ 18
+- A MongoDB Atlas account (free tier is sufficient)
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/<your-username>/khaatapushtak-v2.git
+cd khaatapushtak-v2
+```
+
+### 2. Backend setup
+
+```bash
+cd server
+npm install
+cp .env.example .env   # fill in your real values
+npm run dev
+```
+
+### 3. Frontend setup
+
+```bash
+cd client
+npm install
+cp .env.example .env   # fill in your real values
+npm run dev
+```
+
+The app will be running at `http://localhost:5173`, talking to the API at `http://localhost:5000`.
+
+---
+
+## Environment Variables
+
+**`server/.env`**
+
+```
+PORT=5000
+MONGO_URI=mongodb+srv://<user>:<pass>@cluster0.mongodb.net/khaatapushtak
+NODE_ENV=development
+CLIENT_URL=http://localhost:5173
+JWT_SECRET=<generate with the command below>
+```
+
+Generate a secure secret:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+**`client/.env`**
+
+```
+VITE_API_URL=http://localhost:5000/api
 ```
 
 ---
 
-# 🤖 Role of AI
+## Deployment
 
-AI tools such as ChatGPT and Claude were used as:
+Full step-by-step guide in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). Quick summary:
 
-- Architectural Assistants
-- Documentation Partners
-- Learning Companions
-
-The project logic, understanding, debugging, modifications, and implementation decisions were manually studied and customized.
+1. **MongoDB Atlas** — create a free cluster, whitelist `0.0.0.0/0` (or Render's static IPs), copy the connection string
+2. **Render** (backend) — connect the repo, set root directory to `server`, add env vars, deploy
+3. **Vercel** (frontend) — connect the repo, set root directory to `client`, add `VITE_API_URL` pointing to your Render URL, deploy
 
 ---
 
-# 👨‍💻 Author
+## Testing
 
-**Rishab Vaish**
+```bash
+# Backend
+cd server && npm test
 
-B.Voc Software Development Student  
-Passionate about Full Stack Development, Cloud Technologies and Building Practical Projects.
+# Frontend
+cd client && npm test
+```
+
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for what's covered and why.
+
+---
+
+## API Documentation
+
+Full endpoint reference (request/response shapes, auth requirements, error codes) in [`docs/API.md`](docs/API.md).
+
+---
+
+## Future Improvements
+
+See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the full list — profile pictures, monthly analytics, PDF/Excel export, budget planning, email verification, forgot password, 2FA, PWA/offline support, and more.
+
+---
+
+## Contributing
+
+This is primarily a personal learning/portfolio project, but suggestions are welcome:
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes
+4. Open a Pull Request
+
+---
+
+## License
+
+MIT — see [`LICENSE`](LICENSE).
+
+---
+
+## Author
+
+Built by **[Your Name]** as a full-stack learning project, evolving from a file-system-based Node.js app (V1) into a production-grade MERN application (V2).
+
+- GitHub: `https://github.com/<your-username>`
+- LinkedIn: `https://linkedin.com/in/<your-profile>`

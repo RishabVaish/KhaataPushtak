@@ -1,53 +1,54 @@
-import { RouterProvider } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
-import router from "./routes/AppRoutes";
-import { AuthProvider, useAuth } from "./context/AuthContext";
-import { ThemeProvider } from "./context/ThemeContext";
-import ErrorBoundary from "./components/ErrorBoundary";
-import FullPageLoader from "./components/FullPageLoader";
+import express from "express";
+import cors from "cors";
+import morgan from "morgan";
+import hisaabRoutes from "./routes/hisaabRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
-// AppContent reads auth state and gates the ENTIRE router behind
-// AuthContext's initial "checking localStorage" phase. Without this,
-// Navbar would briefly render its "Guest" state (Login/Register
-// links) for an already-logged-in user, flashing to "Logged in" a
-// moment later once rehydration finishes. This must be a separate
-// component (not inline in App) because useAuth() can only be
-// called INSIDE AuthProvider's tree.
-const AppContent = () => {
-  const { loading } = useAuth();
+// app.js configures the Express app WITHOUT starting a server or
+// connecting to the database. This separation is what makes the app
+// testable: Supertest can import this module and send requests
+// directly against it in-memory, with no real network port and no
+// live MongoDB connection required. index.js remains the actual
+// entry point — it imports this, then adds connectDB() + app.listen().
+const allowedOrigins = (process.env.CLIENT_URL || "*")
+  .split(",")
+  .map((origin) => origin.trim());
 
-  if (loading) {
-    return <FullPageLoader />;
-  }
+const app = express();
 
-  return <RouterProvider router={router} />;
-};
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        allowedOrigins.includes("*") ||
+        allowedOrigins.includes(origin)
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS blocked for origin: ${origin}`));
+      }
+    },
+  }),
+);
 
-function App() {
-  return (
-    // ErrorBoundary wraps EVERYTHING — an error inside ThemeContext,
-    // AuthContext, or any page should show the recovery screen, not
-    // a blank white page.
-    <ErrorBoundary>
-      <ThemeProvider>
-        <AuthProvider>
-          <AppContent />
+app.use(express.json());
 
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 3000,
-              style: {
-                background: "var(--color-surface)",
-                color: "var(--color-text-primary)",
-                border: "1px solid var(--color-border)",
-              },
-            }}
-          />
-        </AuthProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
-  );
+// Silence request logging during tests (NODE_ENV=test) — keeps test
+// output focused on assertions/failures, not HTTP access logs.
+if (process.env.NODE_ENV !== "test") {
+  app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 }
 
-export default App;
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "KhaataPushtak API is running 🚀" });
+});
+
+app.use("/api/hisaab", hisaabRoutes);
+app.use("/api/auth", authRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
+
+export default app;
